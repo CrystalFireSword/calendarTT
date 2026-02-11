@@ -1,16 +1,16 @@
-const CACHE_NAME = "vibe-calendar-v4";
-const ASSETS = ["./","./index.html","./manifest.json","./style.css","./app.js"];
+const cacheName = 'vibecal-v1';
+const assets = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  '/manifest.json'
+];
 
-self.addEventListener("install", e=>{
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets)));
 });
 
-self.addEventListener("activate", e=>{
-  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-
-self.addEventListener("fetch", e=>{
-  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });

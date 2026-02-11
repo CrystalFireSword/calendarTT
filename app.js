@@ -1,103 +1,76 @@
-/** * VibeCal Color Edition
- */
-let events = JSON.parse(localStorage.getItem('vibe_color_events')) || {};
-let viewDate = new Date();
-let selectedKey = null;
+let currentNav = 0;
+let events = JSON.parse(localStorage.getItem('events')) || {};
+let selectedDate = null;
 
-const grid = document.getElementById('calendarGrid');
-const monthLabel = document.getElementById('monthDisplay');
-const panel = document.getElementById('editor');
+const calendarDays = document.getElementById('calendarDays');
+const monthDisplay = document.getElementById('monthDisplay');
+const eventModal = document.getElementById('eventModal');
+const eventInput = document.getElementById('eventInput');
 
-function init() {
-    render();
-    document.getElementById('prevMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() - 1); render(); };
-    document.getElementById('nextMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); render(); };
-    document.getElementById('addBtn').onclick = saveEvent;
-    document.getElementById('closePanel').onclick = () => panel.classList.remove('open');
-}
+function loadCalendar() {
+    const dt = new Date();
+    if (currentNav !== 0) dt.setMonth(new Date().getMonth() + currentNav);
 
-function render() {
-    grid.innerHTML = '';
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-    monthLabel.innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(viewDate);
+    const day = dt.getDate();
+    const month = dt.getMonth();
+    const year = dt.getFullYear();
 
-    let startDay = new Date(year, month, 1).getDay();
-    startDay = (startDay === 0) ? 6 : startDay - 1; 
+    const firstDayOfMonth = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const dateString = firstDayOfMonth.toLocaleDateString('en-us', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
+    const paddingDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(dateString.split(',')[0]);
 
-    const totalDays = new Date(year, month + 1, 0).getDate();
+    monthDisplay.innerText = dt.toLocaleDateString('en-us', { month: 'long', year: 'numeric' });
+    calendarDays.innerHTML = '';
 
-    for(let i=0; i < startDay; i++) {
-        const p = document.createElement('div');
-        p.className = 'day-cell padding';
-        grid.appendChild(p);
-    }
-
-    for(let d=1; d <= totalDays; d++) {
-        const key = `${year}-${month + 1}-${d}`;
-        const dayEvents = events[key] || [];
+    for (let i = 1; i <= paddingDays + daysInMonth; i++) {
+        const daySquare = document.createElement('div');
+        daySquare.classList.add('day-card');
         
-        const cell = document.createElement('div');
-        cell.className = `day-cell ${dayEvents.length > 0 ? 'has-events' : ''}`;
-        
-        // Render pills with saved background colors
-        const eventHtml = dayEvents.slice(0, 3).map(e => 
-            `<div class="event-item" style="background:${e.color}">${e.text}</div>`
-        ).join('');
+        const dayString = `${month + 1}/${i - paddingDays}/${year}`;
 
-        cell.innerHTML = `
-            <span class="date-num">${d}</span>
-            <div class="cell-events">${eventHtml}</div>
-        `;
-
-        cell.onclick = () => openEditor(key, d);
-        grid.appendChild(cell);
+        if (i > paddingDays) {
+            daySquare.innerHTML = `<span class="date-num">${i - paddingDays}</span>`;
+            if (events[dayString]) {
+                events[dayString].forEach(ev => {
+                    const div = document.createElement('div');
+                    div.classList.add('event-tag');
+                    div.innerText = ev;
+                    daySquare.appendChild(div);
+                });
+            }
+            daySquare.onclick = () => {
+                selectedDate = dayString;
+                eventModal.style.display = 'block';
+            };
+        } else {
+            daySquare.style.visibility = 'hidden';
+        }
+        calendarDays.appendChild(daySquare);
     }
 }
 
-function saveEvent() {
-    const input = document.getElementById('eventInput');
-    const color = document.querySelector('input[name="color"]:checked').value;
-    
-    if(!input.value.trim()) return;
-    
-    if(!events[selectedKey]) events[selectedKey] = [];
-    
-    // Save as object
-    events[selectedKey].push({
-        text: input.value.trim(),
-        color: color
+document.getElementById('saveEvent').onclick = () => {
+    if (eventInput.value) {
+        if (!events[selectedDate]) events[selectedDate] = [];
+        events[selectedDate].push(eventInput.value);
+        localStorage.setItem('events', JSON.stringify(events));
+        eventInput.value = '';
+        eventModal.style.display = 'none';
+        loadCalendar();
+    }
+};
+
+document.getElementById('prevMonth').onclick = () => { currentNav--; loadCalendar(); };
+document.getElementById('nextMonth').onclick = () => { currentNav++; loadCalendar(); };
+document.getElementById('closeModal').onclick = () => { eventModal.style.display = 'none'; };
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
     });
-    
-    localStorage.setItem('vibe_color_events', JSON.stringify(events));
-    input.value = '';
-    refreshPanelList();
-    render();
 }
 
-function openEditor(key, num) {
-    selectedKey = key;
-    document.getElementById('selectedDateText').innerText = `Day ${num}`;
-    panel.classList.add('open');
-    refreshPanelList();
-}
-
-function refreshPanelList() {
-    const list = document.getElementById('panelEventList');
-    const dayEvts = events[selectedKey] || [];
-    list.innerHTML = dayEvts.map((e, i) => `
-        <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.8rem; background:${e.color}; padding:8px; border-radius:6px; color:white;">
-            ${e.text} 
-            <button onclick="delEv(${i})" style="color:white; background:rgba(0,0,0,0.2); border:none; border-radius:4px; cursor:pointer;">✕</button>
-        </div>
-    `).join('');
-}
-
-window.delEv = (i) => {
-    events[selectedKey].splice(i, 1);
-    localStorage.setItem('vibe_color_events', JSON.stringify(events));
-    refreshPanelList();
-    render();
-}
-
-init();
+loadCalendar();
