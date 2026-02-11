@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeCal</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    header {
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+
+    .day {
+      background: #020617;
+      border-radius: 0.75rem;
+      min-height: 90px;
+      padding: 0.5rem;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .day span {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .today {
+      outline: 2px solid #38bdf8;
+    }
+
+    .event {
+      margin-top: 0.3rem;
+      background: #2563eb;
+      padding: 0.25rem 0.4rem;
+      border-radius: 0.4rem;
+      font-size: 0.7rem;
+      word-wrap: break-word;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #020617;
+      padding: 1rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 320px;
+    }
+
+    input, button {
+      width: 100%;
+      margin-top: 0.6rem;
+      padding: 0.6rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 0.9rem;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      margin-top: 0.4rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>📆 VibeCal</header>
+
+  <div class="calendar" id="calendar"></div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3 id="modal-title">Add Event</h3>
+      <input type="text" id="eventText" placeholder="Event name" />
+      <button onclick="saveEvent()">Save</button>
+      <button class="delete-btn" onclick="deleteEvents()">Delete all for this day</button>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const modal = document.getElementById('modal');
+    const eventText = document.getElementById('eventText');
+    const modalTitle = document.getElementById('modal-title');
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const todayDate = today.getDate();
+
+    let selectedDateKey = null;
+
+    let events = JSON.parse(localStorage.getItem('events') || '{}');
+
+    function renderCalendar() {
+      calendar.innerHTML = '';
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateKey = `${year}-${month}-${d}`;
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+
+        if (d === todayDate) {
+          dayDiv.classList.add('today');
+        }
+
+        dayDiv.innerHTML = `<span>${d}</span>`;
+
+        if (events[dateKey]) {
+          events[dateKey].forEach(ev => {
+            const evDiv = document.createElement('div');
+            evDiv.className = 'event';
+            evDiv.textContent = ev;
+            dayDiv.appendChild(evDiv);
+          });
+        }
+
+        let pressTimer;
+
+        dayDiv.addEventListener('touchstart', () => {
+          pressTimer = setTimeout(() => openModal(dateKey), 400);
+        });
+
+        dayDiv.addEventListener('touchend', () => {
+          clearTimeout(pressTimer);
+        });
+
+        dayDiv.addEventListener('click', () => openModal(dateKey));
+
+        calendar.appendChild(dayDiv);
+      }
+    }
+
+    function openModal(dateKey) {
+      selectedDateKey = dateKey;
+      modalTitle.textContent = `Events on ${dateKey}`;
+      modal.style.display = 'flex';
+      eventText.value = '';
+    }
+
+    function saveEvent() {
+      if (!eventText.value.trim()) return;
+
+      events[selectedDateKey] = events[selectedDateKey] || [];
+      events[selectedDateKey].push(eventText.value.trim());
+
+      localStorage.setItem('events', JSON.stringify(events));
+      closeModal();
+      renderCalendar();
+    }
+
+    function deleteEvents() {
+      if (!selectedDateKey) return;
+      if (!confirm('Delete all events for this day?')) return;
+
+      delete events[selectedDateKey];
+      localStorage.setItem('events', JSON.stringify(events));
+      closeModal();
+      renderCalendar();
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
+
+    renderCalendar();
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
