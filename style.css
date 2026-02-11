@@ -1,46 +1,49 @@
 :root {
-    --primary: #6200ee;
-    --bg: #f8f9fa;
-    --card: #ffffff;
+    --primary: #bb86fc;
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --text-main: #e1e1e1;
+    --text-dim: #a0a0a0;
+    --border: #333;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
+    font-family: -apple-system, sans-serif;
+    background: #000;
     margin: 0;
-    display: flex;
-    justify-content: center;
+    color: var(--text-main);
 }
 
 #app {
     width: 100%;
-    max-width: 500px;
-    background: var(--card);
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--bg);
     min-height: 100vh;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background: var(--primary);
-    color: white;
+    padding: 15px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    padding: 10px;
+    padding: 5px;
 }
 
 .day-header {
     text-align: center;
     font-weight: bold;
+    font-size: 0.75rem;
+    color: var(--primary);
     padding: 10px 0;
-    font-size: 0.8rem;
-    color: #666;
+    text-transform: uppercase;
 }
 
 .days-container {
@@ -48,29 +51,37 @@ header {
 }
 
 .day-card {
-    border: 1px solid #eee;
-    min-height: 80px;
+    border: 1px solid var(--border);
+    min-height: 100px; /* Increased height to fit text */
     padding: 5px;
     cursor: pointer;
-    background: white;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.day-card:hover { background: #f0f0f0; }
+.day-card:hover { background: var(--surface); }
 
-.date-num { font-weight: bold; margin-bottom: 5px; display: block; }
+.date-num { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; display: block; }
 
-.event-tag {
-    background: #e1bee7;
-    font-size: 0.7rem;
+/* New Event Text Style */
+.event-text {
+    background: #3700b3;
+    color: #e1e1e1;
+    font-size: 0.65rem;
     padding: 2px 4px;
-    border-radius: 3px;
+    border-radius: 4px;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    border-left: 2px solid var(--primary);
 }
 
 /* Modal Styling */
-.modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
-.modal-content { background: white; margin: 20% auto; padding: 20px; width: 80%; border-radius: 8px; }
-input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+.modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index: 100; }
+.modal-content { background: var(--surface); margin: 20% auto; padding: 25px; width: 80%; border-radius: 12px; max-width: 400px;}
+input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; }
+#saveEvent { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+#closeModal { background: transparent; color: var(--text-dim); border: none; padding: 10px; cursor: pointer; }
