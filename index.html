@@ -1,36 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vibe Calendar</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#111827" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeCal Premium</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1 id="monthYear"></h1>
-  </header>
 
-  <div id="calendar" class="calendar"></div>
+    <div class="calendar-card">
+        <header class="cal-nav">
+            <h1 id="monthDisplay">Month Year</h1>
+            <div class="btn-group">
+                <button id="prevMonth">←</button>
+                <button id="nextMonth">→</button>
+            </div>
+        </header>
 
-  <!-- Modal for multiple events -->
-  <div id="eventModal" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="modalDate"></h2>
-      <textarea id="newEvent" placeholder="Add a new event"></textarea>
-      <button id="addEventBtn">Add Event</button>
-      <ul id="eventsList"></ul>
-      <button id="closeModal">Close</button>
+        <div class="grid-container">
+            <div class="weekday-header">
+                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+            </div>
+            <div id="calendarGrid" class="days-grid"></div>
+        </div>
     </div>
-  </div>
 
-  <script src="app.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
+    <div id="editor" class="side-panel">
+        <div class="panel-header">
+            <h2 id="selectedDateText">Select Date</h2>
+            <button id="closePanel">✕</button>
+        </div>
+        <div class="color-picker">
+    <label>Category Color:</label>
+    <div class="color-options">
+        <input type="radio" name="color" value="#3b82f6" id="blue" checked>
+        <label for="blue" style="background:#3b82f6"></label>
+        
+        <input type="radio" name="color" value="#10b981" id="green">
+        <label for="green" style="background:#09583e"></label>
+        
+        <input type="radio" name="color" value="#facc15" id="yellow">
+        <label for="yellow" style="background:#312805"></label>
+        
+        <input type="radio" name="color" value="#ef4444" id="red">
+        <label for="red" style="background:#ef4444"></label>
+        
+        <input type="radio" name="color" value="#a855f7" id="purple">
+        <label for="purple" style="background:#a855f7"></label>
+    </div>
+</div>
+        <textarea id="eventInput" placeholder="What's the vibe?"></textarea>
+        <button id="addBtn">Save to Calendar</button>
+        <div id="panelEventList"></div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

@@ -1,166 +1,105 @@
-/* Body & header */
+:root {
+    --bg: #020617;
+    --card: #0f172a;
+    --border: #1e293b;
+    --text: #f8fafc;
+    --accent-red: #ff4d4d;
+    --red-glow: rgba(255, 77, 77, 0.4);
+}
+
 body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0f172a;
-    color: #e5e7eb;
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh; padding: 20px;
 }
 
-header {
-    padding: 16px;
-    text-align: center;
-    background: #020617;
-    font-size: 1.5rem;
-    font-weight: bold;
+.calendar-card {
+    width: 100%; max-width: 900px;
+    background: var(--card); border-radius: 24px;
+    border: 1px solid var(--border); padding: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Calendar grid */
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    padding: 8px;
+.cal-nav {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
 }
 
-/* Each day card */
-.day {
-    background: #1e293b;
-    border-radius: 10px;
-    min-height: 70px;
-    padding: 6px;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.1s ease, background 0.2s ease;
+.weekday-header {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    text-align: center; font-size: 0.75rem; font-weight: 800;
+    text-transform: uppercase; color: #64748b; margin-bottom: 10px;
 }
 
-.day:hover {
-    transform: translateY(-2px);
-    background: #2563eb;
+.days-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
 }
 
-/* Day number */
-.day small {
-    font-size: 0.75rem;
-    font-weight: bold;
-    margin-bottom: 2px;
-    color: #f1f5f9;
+.day-cell {
+    min-height: 100px; background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 8px; cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 4px;
 }
 
-/* Event inside day */
-.day .event {
+.day-cell:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+
+/* THE RED MARKER: For days with events */
+.day-cell.has-events {
+    border-color: var(--accent-red);
+    box-shadow: inset 0 0 10px var(--red-glow);
+}
+.day-cell.has-events .date-num { color: var(--accent-red); }
+
+.date-num { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+
+/* IN-CELL EVENT LIST */
+.cell-events { display: flex; flex-direction: column; gap: 2px; }
+.event-item {
+    font-size: 0.65rem; background: var(--border);
+    padding: 2px 6px; border-radius: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* SIDE PANEL (Nicer than a modal) */
+.side-panel {
+    position: fixed; right: -400px; top: 0; bottom: 0; width: 350px;
+    background: var(--card); border-left: 1px solid var(--border);
+    padding: 30px; transition: right 0.3s ease; z-index: 100;
+}
+.side-panel.open { right: 0; }
+textarea { width: 100%; height: 100px; background: #020617; color: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin: 15px 0; }
+#addBtn { width: 100%; background: var(--accent-red); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+@media (max-width: 700px) {
+    .day-cell { min-height: 80px; padding: 4px; }
+    .event-item { font-size: 0.55rem; }
+}
+
+/* Color Picker Styling */
+.color-picker { margin: 15px 0; }
+.color-picker label { font-size: 0.8rem; color: var(--text-secondary); }
+.color-options { display: flex; gap: 10px; margin-top: 8px; }
+
+.color-options input { display: none; }
+.color-options label {
+    width: 24px; height: 24px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: transform 0.2s;
+}
+.color-options input:checked + label {
+    border-color: white; transform: scale(1.2);
+}
+
+/* Dynamic Event Pill */
+.event-item {
     font-size: 0.65rem;
-    background: #3b82f6;
-    margin: 2px 0;
-    padding: 2px 4px;
-    border-radius: 5px;
-    overflow-wrap: break-word;
-}
-
-/* Highlight today */
-.day.today {
-    border: 2px solid #facc15;
-}
-
-/* Modal styling */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.75);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
-
-.modal-content {
-    background: #111827;
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 360px;
-    max-height: 80%;
-    overflow-y: auto;
-}
-
-textarea {
-    width: 100%;
-    height: 50px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    padding: 5px;
-    background: #1e293b;
-    color: white;
-    border: none;
-    resize: none;
-}
-
-button {
-    margin-top: 5px;
-    padding: 6px 12px;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-button:hover {
-    background: #2563eb;
-}
-
-.hidden {
-    display: none;
-}
-
-/* Events list in modal */
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-ul li {
-    background: #2563eb;
-    padding: 6px;
-    margin: 4px 0;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-ul li:hover {
-    background: #1e40af;
-}
-
-/* Responsive tweaks */
-@media (max-width: 400px) {
-    .calendar {
-        grid-template-columns: repeat(7, 1fr);
-        gap: 3px;
-    }
-
-    .day {
-        min-height: 60px;
-        padding: 4px;
-    }
-
-    .day .event {
-        font-size: 0.6rem;
-    }
-
-    header {
-        font-size: 1.3rem;
-        padding: 12px;
-    }
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff; /* White text for contrast */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
