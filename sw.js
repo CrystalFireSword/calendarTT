@@ -1,4 +1,4 @@
-const CACHE_NAME = "vibe-calendar-v3";
+const CACHE_NAME = "vibe-calendar-v4";
 const ASSETS = ["./","./index.html","./manifest.json","./style.css","./app.js"];
 
 self.addEventListener("install", e=>{
