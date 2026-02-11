@@ -5,6 +5,8 @@ let chosenColor = '#bb86fc';
 
 const daysEl = document.getElementById('calendarDays');
 const monthDisplay = document.getElementById('monthDisplay');
+const modal = document.getElementById('eventModal');
+const modalDateDisplay = document.getElementById('modalDateDisplay');
 
 function loadCalendar() {
     const dt = new Date();
@@ -19,14 +21,12 @@ function loadCalendar() {
 
     daysEl.innerHTML = '';
 
-    // Add Padding Days
     for (let i = 0; i < firstDay; i++) {
         const p = document.createElement('div');
         p.className = 'day-card padding';
         daysEl.appendChild(p);
     }
 
-    // Add Actual Days
     for (let d = 1; d <= daysInMonth; d++) {
         const daySquare = document.createElement('div');
         daySquare.className = 'day-card';
@@ -43,7 +43,7 @@ function loadCalendar() {
                 evDiv.style.borderLeftColor = ev.color;
                 evDiv.onclick = (e) => {
                     e.stopPropagation();
-                    if(confirm('Delete event?')) {
+                    if(confirm(`Delete "${ev.text}"?`)) {
                         events[dateKey].splice(idx, 1);
                         if(events[dateKey].length === 0) delete events[dateKey];
                         localStorage.setItem('vibeEvents', JSON.stringify(events));
@@ -56,13 +56,15 @@ function loadCalendar() {
 
         daySquare.onclick = () => {
             selectedDate = dateKey;
-            document.getElementById('eventModal').style.display = 'block';
+            // Set date text in modal
+            const prettyDate = new Date(year, month, d).toLocaleDateString('en-us', { month: 'short', day: 'numeric' });
+            modalDateDisplay.innerText = `Events for ${prettyDate}`;
+            modal.classList.add('active');
         };
         daysEl.appendChild(daySquare);
     }
 }
 
-// Color Pickers
 document.querySelectorAll('.color-opt').forEach(opt => {
     opt.onclick = () => {
         document.querySelectorAll('.color-opt').forEach(el => el.classList.remove('selected'));
@@ -71,7 +73,6 @@ document.querySelectorAll('.color-opt').forEach(opt => {
     };
 });
 
-// Save Event
 document.getElementById('saveEvent').onclick = () => {
     const val = document.getElementById('eventInput').value;
     if (val && selectedDate) {
@@ -79,14 +80,13 @@ document.getElementById('saveEvent').onclick = () => {
         events[selectedDate].push({ text: val, color: chosenColor });
         localStorage.setItem('vibeEvents', JSON.stringify(events));
         document.getElementById('eventInput').value = '';
-        document.getElementById('eventModal').style.display = 'none';
+        modal.classList.remove('active');
         loadCalendar();
     }
 };
 
 document.getElementById('prevMonth').onclick = () => { currentNav--; loadCalendar(); };
 document.getElementById('nextMonth').onclick = () => { currentNav++; loadCalendar(); };
-document.getElementById('closeModal').onclick = () => document.getElementById('eventModal').style.display = 'none';
+document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
 
-// Initial Load
 loadCalendar();
