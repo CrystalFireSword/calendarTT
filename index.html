@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>VibeCal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -12,7 +12,7 @@
     <div id="app">
         <header>
             <button id="prevMonth">&lt;</button>
-            <h2 id="monthDisplay"></h2>
+            <h2 id="monthDisplay">Loading...</h2>
             <button id="nextMonth">&gt;</button>
         </header>
 
@@ -24,19 +24,24 @@
             <div class="day-header">Thu</div>
             <div class="day-header">Fri</div>
             <div class="day-header">Sat</div>
-            <div id="calendarDays" class="days-container"></div>
-        </div>
+            <div id="calendarDays"></div> </div>
     </div>
 
     <div id="eventModal" class="modal">
         <div class="modal-content">
-            <h3>Add Event</h3>
-            <input type="text" id="eventInput" placeholder="What's happening?">
+            <h3>New Event</h3>
+            <input type="text" id="eventInput" placeholder="What's the vibe?">
+            <div class="color-picker">
+                <div class="color-opt selected" style="background:#bb86fc" data-color="#bb86fc"></div>
+                <div class="color-opt" style="background:#03dac6" data-color="#03dac6"></div>
+                <div class="color-opt" style="background:#ff0266" data-color="#ff0266"></div>
+                <div class="color-opt" style="background:#ffde03" data-color="#ffde03"></div>
+                <div class="color-opt" style="background:#03a9f4" data-color="#03a9f4"></div>
+            </div>
             <button id="saveEvent">Save</button>
             <button id="closeModal">Cancel</button>
         </div>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>

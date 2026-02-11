@@ -1,87 +1,54 @@
+* { box-sizing: border-box; }
 :root {
     --primary: #bb86fc;
     --bg: #121212;
     --surface: #1e1e1e;
-    --text-main: #e1e1e1;
-    --text-dim: #a0a0a0;
     --border: #333;
+    --text: #e1e1e1;
 }
-
 body {
     font-family: -apple-system, sans-serif;
-    background: #000;
-    margin: 0;
-    color: var(--text-main);
+    background: #000; margin: 0; color: var(--text);
+    display: flex; justify-content: center;
+}
+#app { width: 100%; max-width: 500px; background: var(--bg); min-height: 100vh; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--surface); border-bottom: 1px solid var(--border); }
+
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    width: 100%; 
+}
+#calendarDays { 
+    display: contents; /* Allows children to participate in calendar-grid */
 }
 
-#app {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--bg);
-    min-height: 100vh;
+.day-header { text-align: center; font-size: 0.65rem; color: var(--primary); padding: 10px 0; font-weight: bold; }
+
+.day-card { 
+    border: 0.1px solid var(--border); 
+    min-height: 100px; 
+    padding: 4px; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+}
+.day-card.padding { background: #0a0a0a; cursor: default; }
+
+.date-num { font-weight: bold; font-size: 0.8rem; margin-bottom: 4px; }
+.event-item {
+    font-size: 0.6rem; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border-left: 3px solid transparent;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    padding: 5px;
-}
-
-.day-header {
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.75rem;
-    color: var(--primary);
-    padding: 10px 0;
-    text-transform: uppercase;
-}
-
-.days-container {
-    display: contents;
-}
-
-.day-card {
-    border: 1px solid var(--border);
-    min-height: 100px; /* Increased height to fit text */
-    padding: 5px;
-    cursor: pointer;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.day-card:hover { background: var(--surface); }
-
-.date-num { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; display: block; }
-
-/* New Event Text Style */
-.event-text {
-    background: #3700b3;
-    color: #e1e1e1;
-    font-size: 0.65rem;
-    padding: 2px 4px;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border-left: 2px solid var(--primary);
-}
-
-/* Modal Styling */
-.modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index: 100; }
-.modal-content { background: var(--surface); margin: 20% auto; padding: 25px; width: 80%; border-radius: 12px; max-width: 400px;}
-input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; }
-#saveEvent { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-#closeModal { background: transparent; color: var(--text-dim); border: none; padding: 10px; cursor: pointer; }
+/* Modal */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; }
+.modal-content { background: var(--surface); margin: 20% auto; padding: 20px; width: 85%; border-radius: 12px; }
+.color-picker { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+.color-opt { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+.color-opt.selected { border-color: white; }
+input { width: 100%; padding: 12px; margin-bottom: 20px; background: #222; border: 1px solid var(--border); color: white; border-radius: 6px; }
+#saveEvent { background: var(--primary); border: none; padding: 12px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; }
+#closeModal { background: transparent; color: #888; border: none; width: 100%; cursor: pointer; padding: 10px; }

@@ -1,11 +1,10 @@
 let currentNav = 0;
-let events = JSON.parse(localStorage.getItem('events')) || {};
+let events = JSON.parse(localStorage.getItem('vibeEvents')) || {};
 let selectedDate = null;
+let chosenColor = '#bb86fc';
 
-const calendarDays = document.getElementById('calendarDays');
+const daysEl = document.getElementById('calendarDays');
 const monthDisplay = document.getElementById('monthDisplay');
-const eventModal = document.getElementById('eventModal');
-const eventInput = document.getElementById('eventInput');
 
 function loadCalendar() {
     const dt = new Date();
@@ -13,69 +12,81 @@ function loadCalendar() {
 
     const month = dt.getMonth();
     const year = dt.getFullYear();
-    
     monthDisplay.innerText = dt.toLocaleDateString('en-us', { month: 'long', year: 'numeric' });
 
-    const firstDayOfMonth = new Date(year, month, 1);
+    const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    const dateString = firstDayOfMonth.toLocaleDateString('en-us', { weekday: 'long' });
-    const paddingDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(dateString);
 
-    calendarDays.innerHTML = '';
+    daysEl.innerHTML = '';
 
-    for (let i = 0; i < paddingDays; i++) {
-        const paddingSquare = document.createElement('div');
-        paddingSquare.classList.add('day-card');
-        paddingSquare.style.cursor = 'default';
-        calendarDays.appendChild(paddingSquare);
+    // Add Padding Days
+    for (let i = 0; i < firstDay; i++) {
+        const p = document.createElement('div');
+        p.className = 'day-card padding';
+        daysEl.appendChild(p);
     }
 
-    for (let i = 1; i <= daysInMonth; i++) {
+    // Add Actual Days
+    for (let d = 1; d <= daysInMonth; d++) {
         const daySquare = document.createElement('div');
-        daySquare.classList.add('day-card');
+        daySquare.className = 'day-card';
+        const dateKey = `${month + 1}/${d}/${year}`;
         
-        const dayString = `${month + 1}/${i}/${year}`;
-        daySquare.innerHTML = `<span class="date-num">${i}</span>`;
+        daySquare.innerHTML = `<span class="date-num">${d}</span>`;
 
-        if (events[dayString]) {
-            // RENDER EVENT NAME TEXT HERE
-            events[dayString].forEach(ev => {
-                const eventDiv = document.createElement('div');
-                eventDiv.classList.add('event-text');
-                eventDiv.innerText = ev;
-                daySquare.appendChild(eventDiv);
+        if (events[dateKey]) {
+            events[dateKey].forEach((ev, idx) => {
+                const evDiv = document.createElement('div');
+                evDiv.className = 'event-item';
+                evDiv.innerText = ev.text;
+                evDiv.style.backgroundColor = ev.color + '44';
+                evDiv.style.borderLeftColor = ev.color;
+                evDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    if(confirm('Delete event?')) {
+                        events[dateKey].splice(idx, 1);
+                        if(events[dateKey].length === 0) delete events[dateKey];
+                        localStorage.setItem('vibeEvents', JSON.stringify(events));
+                        loadCalendar();
+                    }
+                };
+                daySquare.appendChild(evDiv);
             });
         }
-        
-        daySquare.onclick = () => {
-            selectedDate = dayString;
-            eventModal.style.display = 'block';
-        };
 
-        calendarDays.appendChild(daySquare);
+        daySquare.onclick = () => {
+            selectedDate = dateKey;
+            document.getElementById('eventModal').style.display = 'block';
+        };
+        daysEl.appendChild(daySquare);
     }
 }
 
-// Event Handlers
+// Color Pickers
+document.querySelectorAll('.color-opt').forEach(opt => {
+    opt.onclick = () => {
+        document.querySelectorAll('.color-opt').forEach(el => el.classList.remove('selected'));
+        opt.classList.add('selected');
+        chosenColor = opt.dataset.color;
+    };
+});
+
+// Save Event
 document.getElementById('saveEvent').onclick = () => {
-    if (eventInput.value) {
+    const val = document.getElementById('eventInput').value;
+    if (val && selectedDate) {
         if (!events[selectedDate]) events[selectedDate] = [];
-        events[selectedDate].push(eventInput.value);
-        localStorage.setItem('events', JSON.stringify(events));
-        eventInput.value = '';
-        eventModal.style.display = 'none';
+        events[selectedDate].push({ text: val, color: chosenColor });
+        localStorage.setItem('vibeEvents', JSON.stringify(events));
+        document.getElementById('eventInput').value = '';
+        document.getElementById('eventModal').style.display = 'none';
         loadCalendar();
     }
 };
 
 document.getElementById('prevMonth').onclick = () => { currentNav--; loadCalendar(); };
 document.getElementById('nextMonth').onclick = () => { currentNav++; loadCalendar(); };
-document.getElementById('closeModal').onclick = () => { eventModal.style.display = 'none'; };
+document.getElementById('closeModal').onclick = () => document.getElementById('eventModal').style.display = 'none';
 
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
-}
-
+// Initial Load
 loadCalendar();
