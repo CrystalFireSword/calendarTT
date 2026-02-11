@@ -1,161 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vibe Calendar</title>
-
-    <link rel="manifest" href="./manifest.json" />
-    <meta name="theme-color" content="#111827" />
-
-    <style>
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f172a;
-            color: #e5e7eb;
-        }
-
-        header {
-            padding: 16px;
-            text-align: center;
-            font-size: 1.2rem;
-            background: #020617;
-        }
-
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            padding: 12px;
-        }
-
-        .day {
-            background: #020617;
-            border-radius: 8px;
-            padding: 10px;
-            min-height: 60px;
-            cursor: pointer;
-        }
-
-        .day:hover {
-            background: #1e293b;
-        }
-
-        .day small {
-            opacity: 0.6;
-            font-size: 0.7rem;
-        }
-
-        .event {
-            margin-top: 4px;
-            font-size: 0.75rem;
-            background: #2563eb;
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vibe Calendar</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
 </head>
-
 <body>
-    <header id="title"></header>
-    <div class="calendar" id="calendar"></div>
+  <header>
+    <h1 id="monthYear"></h1>
+  </header>
 
-    <script>
-        // ---- SAFE INIT (important for installed PWAs)
-        window.addEventListener("DOMContentLoaded", () => {
-            renderCalendar();
-        });
+  <div id="calendar" class="calendar"></div>
 
-        const STORAGE_KEY = "vibe-calendar-events-v1";
+  <!-- Modal for multiple events -->
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalDate"></h2>
+      <textarea id="newEvent" placeholder="Add a new event"></textarea>
+      <button id="addEventBtn">Add Event</button>
+      <ul id="eventsList"></ul>
+      <button id="closeModal">Close</button>
+    </div>
+  </div>
 
-        function storageAvailable() {
-            try {
-                const test = "__test__";
-                localStorage.setItem(test, test);
-                localStorage.removeItem(test);
-                return true;
-            } catch {
-                return false;
-            }
-        }
-
-        function getEvents() {
-            if (!storageAvailable()) {
-                alert("Storage unavailable in this app context.");
-                return {};
-            }
-            const raw = localStorage.getItem(STORAGE_KEY);
-            return raw ? JSON.parse(raw) : {};
-        }
-
-        function saveEvents(events) {
-            if (!storageAvailable()) return;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-        }
-
-        function renderCalendar() {
-            const calendar = document.getElementById("calendar");
-            const title = document.getElementById("title");
-            if (!calendar) return;
-
-            calendar.innerHTML = "";
-
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-
-            title.textContent = now.toLocaleString("default", {
-                month: "long",
-                year: "numeric"
-            });
-
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const events = getEvents();
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const key = `${year}-${month + 1}-${day}`;
-                const cell = document.createElement("div");
-                cell.className = "day";
-                cell.innerHTML = `<small>${day}</small>`;
-
-                if (events[key]) {
-                    const ev = document.createElement("div");
-                    ev.className = "event";
-                    ev.textContent = events[key];
-                    cell.appendChild(ev);
-                }
-
-                cell.onclick = () => {
-                    setTimeout(() => {
-                        const current = events[key] || "";
-                        const text = prompt("Event for " + key, current);
-
-                        if (text === null) return;
-
-                        if (text.trim() === "") {
-                            delete events[key];
-                        } else {
-                            events[key] = text.trim();
-                        }
-
-                        saveEvents(events);
-                        renderCalendar();
-                    }, 0);
-                };
-
-
-
-                calendar.appendChild(cell);
-            }
-        }
-
-        // ---- REGISTER SERVICE WORKER (SAFE)
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("./sw.js");
-        }
-    </script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
-
 </html>
